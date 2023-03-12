@@ -44,6 +44,7 @@ class PostURLTests(TestCase):
         cls.templates_url_names_need_auth = {
             f'/posts/{cls.post.id}/edit/': 'posts/create_post.html',
             '/create/': 'posts/create_post.html',
+            '/follow/': 'posts/follow.html',
         }
 
         cls.templates_url_list = {
@@ -87,7 +88,7 @@ class PostURLTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_urls_not_author_users_redirect(self):
-        """Test regirect guest"""
+        """Test redirect guest"""
         self.assertRedirects(
             self.guest.get(f'/posts/{self.post.id}/edit/'),
             f'/auth/login/?next=/posts/{self.post.id}/edit/'
@@ -96,6 +97,10 @@ class PostURLTests(TestCase):
             self.guest.get('/create/'),
             '/auth/login/?next=/create/'
         )
+        self.assertRedirects(
+            self.guest.get('/follow/'),
+            '/auth/login/?next=/follow/'
+        )
 
     def test_author_edit_wrong_post(self):
         """Test author try edit not own post"""
@@ -103,3 +108,11 @@ class PostURLTests(TestCase):
             self.authorized_client.get(f'/posts/{self.post.id}/edit/'),
             f'/posts/{self.post.id}/'
         )
+
+    def test_custom_404_template(self):
+        """Test custom 404 template"""
+        response_auth = self.post_author.get('/unexisting_page/')
+        self.assertTemplateUsed(response_auth, 'core/404.html')
+
+        response_guest = self.guest.get('/unexisting_page/')
+        self.assertTemplateUsed(response_guest, 'core/404.html')

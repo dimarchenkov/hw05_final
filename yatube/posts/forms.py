@@ -14,6 +14,7 @@ class PostForm(forms.ModelForm):
         help_texts = {
             'text': 'Текст нового поста',
             'group': 'Группа, к которой будет относиться пост',
+            'image': 'Картинка поста',
         }
 
 

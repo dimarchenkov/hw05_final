@@ -12,9 +12,10 @@ def permission_denied(request, exception):
 
 
 def csrf_failure(request, reason=''):
-    """Page 403csrf"""
+    """Page 403csrf."""
     return render(request, 'core/403csrf.html')
 
 
 def server_error(request):
+    """Page 500."""
     return render(request, 'core/500.html', status=500)

@@ -115,6 +115,8 @@ class PostPagesTests(TestCase):
         self.assertEqual(post.text, self.post.text)
         self.assertEqual(post.author, self.post.author)
         self.assertEqual(post.group.id, self.post.group.id)
+        self.assertEqual(post.image, self.post.image)
+        self.assertEqual(post.comments.last(), self.comment_post)
 
     def test_forms_show_correct(self):
         """Test form correct."""
@@ -168,6 +170,7 @@ class PostPagesTests(TestCase):
                 'posts:profile',
                 kwargs={'username': self.user.username}))
         self.assertEqual(response.context['author'], self.user)
+        self.assertFalse(response.context['following'])
         self.check_post_info(response.context['page_obj'][0])
 
     def test_detail_page_show_correct_context(self):
@@ -176,6 +179,10 @@ class PostPagesTests(TestCase):
             reverse(
                 'posts:post_detail',
                 kwargs={'post_id': self.post.id}))
+        self.assertIsInstance(
+            response.context['form'].fields['text'],
+            forms.fields.CharField
+        )
         self.check_post_info(response.context['post'])
 
     def test_post_in_right_pages(self):
@@ -206,14 +213,11 @@ class PostPagesTests(TestCase):
             slug='other-group',
             description='Очень новыя группа'
         )
-
         post = Post.objects.create(
             text='Тестовый текст',
             author=self.user,
             group=group_new,
-
         )
-
         response = self.authorized_client.get(reverse(
             'posts:group_list',
             kwargs={'slug': self.group.slug})
@@ -312,8 +316,7 @@ class PaginatorViewsTest(TestCase):
 
 
 class FollowTest(TestCase):
-    author = None
-
+    """Test followers."""
     @classmethod
     def setUpTestData(cls):
         """Setup db."""
@@ -395,8 +398,8 @@ class FollowTest(TestCase):
         Follow.objects.create(user=self.follower, author=self.author)
         response = self.authorized_client.get(reverse('posts:follow_index'))
         self.assertIn('page_obj', response.context)
-        last_post = response.context['page_obj'][0]
-        self.assertEqual(last_post, self.post)
+        last_post = response.context['page_obj']
+        self.assertIn(self.post, last_post)
 
     def test_not_show_author_post_on_not_follower_page(self):
         """Test not show author post on not follower_page."""

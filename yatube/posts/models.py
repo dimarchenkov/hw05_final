@@ -57,7 +57,7 @@ class Post(CreatedModel):
 
     def __str__(self):
         """Get post text."""
-        return self.text
+        return self.text[:15]
 
 
 class Comment(CreatedModel):
@@ -75,6 +75,10 @@ class Comment(CreatedModel):
         'Текст',
         help_text='Текст нового комментария')
 
+    class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Комментарий'
+
     def __str__(self):
         return self.text[:15]
 
@@ -90,3 +94,8 @@ class Follow(CreatedModel):
         on_delete=models.CASCADE,
         related_name='following'
     )
+
+    class Meta:
+        constraints = [models.UniqueConstraint(
+            fields=['author_id', 'user_id'], name='unique_follow')
+        ]

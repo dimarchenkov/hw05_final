@@ -21,7 +21,7 @@ class PostModelTest(TestCase):
 
     def test_models_have_correct_object_names(self):
         """Test model Post have correct object name."""
-        self.assertNotEqual(
+        self.assertEqual(
             str(PostModelTest.post),
             PostModelTest.post.text[:15]
         )
