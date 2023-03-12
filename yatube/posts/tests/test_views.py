@@ -37,19 +37,20 @@ class PostPagesTests(TestCase):
             slug='fat-oops',
             description='TurboGroup',
         )
+        cls.image = SimpleUploadedFile(
+            name='small.gif',
+            content=SMALL_GIF,
+            content_type='image/gif',
+        )
         cls.post = Post.objects.create(
             text='Тестовый текст поста',
             author=cls.user,
             group=cls.group,
-        )
-        cls.image = SimpleUploadedFile(
-            name='small.gif',
-            content=SMALL_GIF,
-            content_type='image/gif'
+            image=cls.image,
         )
         cls.comment_post = Comment.objects.create(
             author=cls.user,
-            text='А мне только битвы запомнились»',
+            text='Мой первый комментарий',
             post=cls.post
         )
         cls.url_pages = [
@@ -184,6 +185,8 @@ class PostPagesTests(TestCase):
             forms.fields.CharField
         )
         self.check_post_info(response.context['post'])
+        first_comment = response.context["comments"][0]
+        self.assertEqual(first_comment, self.comment_post)
 
     def test_post_in_right_pages(self):
         """Test post places on right pages."""
@@ -224,30 +227,6 @@ class PostPagesTests(TestCase):
         )
         all_objects = response.context['page_obj']
         self.assertNotIn(post, all_objects)
-
-    def test_urls_show_correct_image(self):
-        """Test correct image on index, group_list and profile."""
-        for url in self.url_pages:
-            with self.subTest(url=url):
-                response = self.authorized_client.get(url)
-                self.assertEqual(
-                    response.context['page_obj'][0].image,
-                    self.post.image,
-                    'Не та картинка.'
-                )
-
-    def test_post_profile_show_correct_image(self):
-        """Test correct image on post_detail."""
-        response = self.authorized_client.get(
-            reverse(
-                'posts:post_detail',
-                kwargs={'post_id': self.post.id}
-            )
-        )
-        self.assertEqual(
-            response.context.get('post').image,
-            self.post.image
-        )
 
     def test_index_caches(self):
         """Test cache working on index page."""

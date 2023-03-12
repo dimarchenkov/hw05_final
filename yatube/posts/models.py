@@ -45,7 +45,6 @@ class Post(CreatedModel):
         verbose_name='Группа',
         help_text='Укажите название вашей группы',
     )
-
     image = models.ImageField(
         'Картинка',
         upload_to='posts/',
@@ -97,5 +96,5 @@ class Follow(CreatedModel):
 
     class Meta:
         constraints = [models.UniqueConstraint(
-            fields=['author_id', 'user_id'], name='unique_follow')
+            fields=['author', 'user'], name='unique_follow')
         ]
