@@ -101,9 +101,7 @@ class PostFormTests(TestCase):
             'image': self.new_image,
         }
         response = self.authorized_user.post(
-            reverse(
-                'posts:post_edit',
-                args=[post.id]),
+            reverse('posts:post_edit', args=[post.id]),
             data=form_data,
             follow=True
         )
